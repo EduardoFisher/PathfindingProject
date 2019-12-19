@@ -13,6 +13,10 @@
     background-color: green;
 }
 
+.node-reset{
+    background-color: rgb(255, 255, 255);
+}
+
 .node-visited {
     animation-name: visitedAnimation;
     animation-duration: 1.5s;
