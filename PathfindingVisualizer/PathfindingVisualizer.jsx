@@ -3,11 +3,15 @@ import Node from './Node/Node';
 import {dijkstra, getNodesInShortestPathOrder} from '../Algorithms/dijkstra';
 import './PathfindingVisualizer.css';
 import { element } from "prop-types";
+import { recurvisDivision } from "../Algorithms/recursiveDivision";
+import { resolve } from "dns";
+import { withStatement, returnStatement } from "@babel/types";
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
 const FINISH_NODE_ROW = 10;
 const FINISH_NODE_COL = 35;
+
 
 export default class PathfindingVisualizer extends Component
 {
@@ -85,10 +89,88 @@ export default class PathfindingVisualizer extends Component
 
       resetBoard()
       {
+          
+        for(let row = 0; row < 20; row++)
+        {   
         
+            for(let col = 0; col < 50; col++)
+            {
+                
+            }
+            
+        }
         
       }
 
+      async createMaze()
+      { 
+        for(let i = 0; i < 20; i++)
+         {
+              this.addWall(i, 0);
+              this.addWall(i, 49);
+              await sleep(0.25);
+         }
+         for(let i = 1; i < 49; i++)
+         {
+            this.addWall(0, i);
+            this.addWall(19, i);
+            await sleep(0.25);
+         }  
+        this.RecursiveDivision(50, 20);
+
+      }
+
+      async RecursiveDivision(row, col)
+      {
+          if(row < 2 || col < 2)
+            return;
+            console.log(row, ":", col);
+          const ishorizontal = chooseOrientation(row, col);
+          console.log(ishorizontal);
+          if(ishorizontal === 0)
+          {
+                console.log("horizontal");
+                const wx = Math.floor(Math.random() * (col-2));
+                const px = Math.floor(Math.random() * (row-2));
+                console.log(wx);
+                for(let i = 1; i < row-1; i++)
+                {
+                    if( i !== px )
+                    {
+                        this.addWall(wx, i);
+                        await sleep(0.25);
+                    }
+                }
+                this.RecursiveDivision(row, Math.floor(col/2));
+                //this.RecursiveDivision(row, col);
+          }
+          else
+          {
+                console.log("vertical");
+                const wy = Math.floor(Math.random() * (row-2));
+                const py = Math.floor(Math.random() * (col-2));
+                console.log(wy);
+                for(let i = 1; i < col-1; i++)
+                {
+                    if( i !== py )
+                    {
+                        this.addWall(i, wy);
+                        await sleep(0.25);
+                    }
+                }
+                this.RecursiveDivision(Math.floor(row/2), col);
+                //this.RecursiveDivision(row, col);
+          }
+          
+
+      }
+
+      
+      addWall(row, col)
+      {
+          const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+          this.setState({grid: newGrid});
+      }
       render() 
       {
         const {grid, mouseIsPressed} = this.state;
@@ -96,10 +178,13 @@ export default class PathfindingVisualizer extends Component
         return (
           <>
             <button onClick={() => this.visualizeDijkstra()}>
-            Visualize Dijkstra's Algorithm
+                Visualize Dijkstra's Algorithm
             </button>
             <button onClick={() => this.resetBoard()}>
-            Reset Board
+                Reset Board
+            </button>
+            <button onClick={() => this.createMaze()}>
+                Create Maze
             </button>
             <div className="grid">
               {grid.map((row, rowIdx) => {
@@ -147,7 +232,8 @@ const getInitialGrid = () =>
     return grid;
 };  
 
-const createNode = (col, row) => {
+const createNode = (col, row) => 
+{
     return {
       col,
       row,
@@ -163,7 +249,8 @@ const createNode = (col, row) => {
     };
   };
 
-const getNewGridWithWallToggled = (grid, row, col) => {
+const getNewGridWithWallToggled = (grid, row, col) => 
+{
     const newGrid = grid.slice();
     const node = newGrid[row][col];
     const newNode = {
@@ -172,4 +259,30 @@ const getNewGridWithWallToggled = (grid, row, col) => {
     };
     newGrid[row][col] = newNode;
     return newGrid;
-  };
+};
+
+const sleep = (milliseconds) =>
+{
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+const chooseOrientation = (width, height) =>
+{
+    console.log("width:", width, "height;", height);
+    if(width < height)
+        return 0;
+    else if(height < width)
+        return 1;
+    else 
+        return Math.floor(Math.random() * 2);
+}
+
+const checkIfStart = (x, y) =>
+{
+    return (x === START_NODE_ROW && y === START_NODE_COL);
+}
+
+const checkIfFinish = (x, y) =>
+{
+    return (x === FINISH_NODE_ROW && y === FINISH_NODE_COL);
+}
